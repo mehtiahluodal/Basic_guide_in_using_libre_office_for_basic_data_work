@@ -1,0 +1,1616 @@
+LIBREOFFICE CALC FIELD MANUAL Beginner-to-advanced practical spreadsheet
+guide Excel-to-Calc transition | Data preparation | Formulas | Analysis
+| Graphs | Documentation | Troubleshooting
+
+PURPOSE This manual is for someone who knows some Microsoft Excel but
+must work in LibreOffice Calc. It is written as a practical workbook
+companion: follow the steps, copy the formulas, test them on a small
+sample, then apply them to the full dataset.
+
+The examples use neutral measurement, inventory, operations, and
+financial-style tables. No specialist subject knowledge is required.
+
+IMPORTANT VERSION NOTE LibreOffice changes over time. This guide targets
+modern Calc, with menu paths based on the current menu interface. Some
+commands move slightly between releases, operating systems, and
+user-interface layouts. If a menu path differs, use Help > Search
+Commands, or press Alt+? if your installation provides command search.
+Press F1 for the built-in Help. The function wizard is available with
+Ctrl+F2.
+
+============================================================ CONTENTS
+============================================================
+
+1.  The mental model: Excel versus Calc
+2.  Set up Calc before doing serious work
+3.  Understand cells, references, formulas, and separators
+4.  Import CSV files correctly
+5.  Structure a dataset so formulas and charts work
+6.  Data cleaning: text, numbers, dates, blanks, duplicates
+7.  Filtering, sorting, selecting, and filling
+8.  Formula toolkit: the functions you are likely to need
+9.  Lookup and cross-reference methods
+10. Statistics, regression, covariance, and uncertainty calculations
+11. Trigonometry and angle calculations
+12. Dates, times, and continuous time values
+13. Graphs: complete tutorial from data to polished chart
+14. Graph troubleshooting: wrong axes, missing series, bad scales
+15. Pivot Tables / DataPilot
+16. Analysis tools, Goal Seek, scenarios, and Solver
+17. Spreadsheet automation and macros
+18. Practical workflow for a timed data-analysis task
+19. Exact troubleshooting notes and common Calc errors
+20. Excel-to-Calc quick reference
+21. How to use documentation without AI
+22. Practice drills and final checklist
+23. Official documentation and learning links
+
+============================================================ 1. THE
+MENTAL MODEL: EXCEL VERSUS CALC
+============================================================
+
+The important point: Most spreadsheet concepts are identical. The
+differences are mainly interface layout, formula separators,
+sheet-reference notation, some function names, and compatibility
+details.
+
+EXCEL CONCEPT CALC EQUIVALENT / DIFFERENCE Ribbon Menus and toolbars by
+default; optional Notebookbar layouts exist. Worksheet Sheet Workbook
+Spreadsheet document .xlsx Opens and saves in Calc; use ODS as the
+native format. .xlsm May open, but VBA macros are not guaranteed to
+work. .ods Calc’s native OpenDocument spreadsheet format. Formula
+argument comma Usually semicolon in Calc’s default formula syntax.
+Sheet1!A1 Usually Sheet1.A1 in Calc’s native syntax. PivotTable Pivot
+Table (historically called DataPilot). Power Query No direct built-in
+equivalent; use Calc tools, Python, database or ETL tools. VBA
+LibreOffice Basic / UNO API / supported scripting languages. Chart
+Design ribbon Double-click chart; use menus and right-click context
+commands. Name Manager Sheet > Named Ranges and Expressions > Manage
+(menu wording varies). Goal Seek Tools > Goal Seek. Scenario Manager
+Tools > Scenarios.
+
+1.1 The interface Calc normally has: - Menu bar: File, Edit, View,
+Insert, Format, Styles, Sheet, Data, Tools, Window, Help. - Standard
+toolbar: save, undo, redo, print, and common actions. - Formatting
+toolbar: font, size, alignment, borders, number formats. - Formula bar:
+name box, function wizard, input line. - Sheet tabs at the bottom. -
+Status bar at the bottom.
+
+Excel users often search for a ribbon button. In Calc, learn the menu
+names: - Data: sorting, filters, Pivot Tables, statistics, validity. -
+Insert: charts, functions, images, rows/columns. - Format: cells, rows,
+columns, conditional formatting. - Sheet: sheet operations and named
+ranges. - Tools: Goal Seek, Scenarios, macros, options.
+
+1.2 File formats and safe compatibility Use ODS as your working master
+file: File > Save As > ODF Spreadsheet (.ods)
+
+When another person requires Excel: File > Save As > Excel 2007–365
+(.xlsx)
+
+Best practice: 1. Keep one untouched source CSV or XLSX. 2. Save a
+working copy as ODS. 3. Do the analysis in ODS. 4. Save an XLSX delivery
+copy only when needed. 5. Reopen the XLSX copy and inspect formulas,
+charts, conditional formatting, and print layout.
+
+Do not assume that every Excel feature survives conversion. Complex
+Excel macros, Power Query queries, external data connections,
+specialized charts, and some advanced formula behavior may change. If
+the file must return to Excel, test the round trip early.
+
+1.3 Performance habits For large tables: - Avoid whole-column array
+calculations repeated thousands of times if a bounded range is enough. -
+Prefer one clean source table with one header row and no blank rows
+inside it. - Avoid merged cells in data tables. - Avoid volatile
+formulas such as NOW() and INDIRECT() when not needed. - Do not use
+repeated formatting across a million empty rows. - Use helper columns
+for complex logic instead of one enormous nested formula. - Turn off
+automatic recalculation temporarily only when a workbook is genuinely
+slow: Data/Tools options vary by version; use Tools > Cell Contents >
+AutoCalculate if present, or the calculation options under Tools >
+Options > LibreOffice Calc > Calculate. Restore automatic calculation
+before final checks. - Save frequently. - Use CSV for raw data exchange
+and ODS for the working analysis.
+
+============================================================ 2. SET UP
+CALC BEFORE DOING SERIOUS WORK
+============================================================
+
+2.1 Confirm your version Help > About LibreOffice Record the version
+number. Function availability and menu names can depend on the version.
+
+2.2 Set formula syntax and separators Tools > Options > LibreOffice
+Calc > Formula
+
+This area controls formula syntax and separators. In many default
+installations: - Function arguments use semicolons:
+=IF(A1>0;“Yes”;“No”) - Array-column and array-row separators have their
+own settings. - Excel A1 syntax may be selectable.
+
+If a formula copied from a website uses commas, do not assume the
+formula itself is wrong. Replace argument-separator commas with
+semicolons if your Calc uses semicolons. Do not replace commas inside
+quoted text.
+
+2.3 Set calculation behavior Tools > Options > LibreOffice Calc >
+Calculate
+
+This is where you can inspect settings such as: - Automatic
+calculation. - Wildcards versus regular expressions in formulas. -
+Iterative references, if required. - Precision and calculation options.
+
+2.4 Useful first settings - View > Freeze Rows and Columns: keep headers
+visible. - View > Show Formula: temporarily display formulas instead of
+results. - Tools > Options > LibreOffice > General: extended tips can
+help identify toolbar buttons. - Tools > Options > LibreOffice > View:
+icon style and scaling options.
+
+============================================================ 3. CELLS,
+REFERENCES, FORMULAS, AND SEPARATORS
+============================================================
+
+3.1 Cell addresses A1 means column A, row 1. A1:A10 means a range from
+A1 through A10. A:A means the whole column A.
+$A1meansanabsolutereference.A1 locks the column. A$1 locks the row.
+
+Example: In C2: =A2B2 Copying down changes it to =A3B3.
+
+Absolute-reference example: If tax rate is in F1, use =E2*$F$1 and copy
+down. F1 remains fixed.
+
+F4: While editing or selecting a cell reference in a formula, F4 cycles
+through relative, absolute, and mixed references in common Calc
+configurations. If it does not, insert dollar signs manually.
+
+3.2 Sheet references In native Calc syntax: =Data.A2 =Data.$A$2 =‘Clean
+Data’.A2
+
+Excel commonly displays: =Data!A2
+
+If you open an Excel workbook, Calc may preserve or display a
+compatibility syntax depending on settings. Do not panic if the
+punctuation differs.
+
+3.3 Formula anatomy Every formula begins with =. Operators: + add -
+subtract * multiply / divide ^ power & join text = equal <> not equal >
+greater than < less than >= greater than or equal <= less than or equal
+
+Example: =(B2C2)(1-D2)
+
+Order of operations follows standard arithmetic. Use parentheses when in
+doubt.
+
+3.4 Argument separators Typical Calc: =SUM(A1;A10)
+=IF(A1>10;“High”;“Low”) =SUMIFS(C2:C100;A2:A100;“North”;B2:B100;“>100”)
+
+Typical Excel: =SUM(A1,A10) =IF(A1>10,“High”,“Low”)
+=SUMIFS(C2:C100,A2:A100,“North”,B2:B100,“>100”)
+
+The semicolon is usually the only visible syntax difference in simple
+formulas, but not the only compatibility difference between the
+applications.
+
+3.5 Formula Wizard Press Ctrl+F2 or click the Function Wizard button
+beside the formula line. Use it when: - You do not know the exact
+argument order. - You need to inspect required versus optional
+arguments. - You want to browse categories. - A formula returns an error
+and you suspect an argument is missing.
+
+============================================================ 4. IMPORT
+CSV FILES CORRECTLY
+============================================================
+
+This is one of the most important practical skills. A wrong import
+setting can corrupt dates, decimal values, IDs, or columns before
+analysis even begins.
+
+4.1 Import procedure 1. Open Calc. 2. File > Open. 3. Select the .csv
+file. 4. The Text Import dialog should appear. 5. Choose the correct
+separator: comma, semicolon, tab, or another delimiter. 6. Inspect the
+preview. Each field should appear in the correct column. 7. Set text
+encoding, usually UTF-8 unless the source says otherwise. 8. Check
+quoted text handling. 9. Set column types where necessary. 10. Click OK.
+
+4.2 Important import choices - Separated by: choose the actual
+delimiter. - Detect special numbers: useful for dates and numbers, but
+inspect the result. - Quoted field as text: important when text contains
+commas. - Language/locale: controls decimal and date interpretation. -
+Column type Text: use for IDs with leading zeros, codes, or values that
+must not be converted.
+
+Example: An ID “00127” must remain 00127. Import that column as Text.
+Otherwise Calc may convert it to 127.
+
+4.3 Decimal separator problems If the source uses 12.45 but your locale
+expects 12,45, values may import as text or be misread. Fix: - Reimport
+with the correct language/locale, or - Select the column and use Data >
+Text to Columns, setting the correct separators and column type. - Do
+not blindly replace every period or comma; first identify which
+character is the decimal separator and which is the thousands separator.
+
+4.4 If all data appears in one column Cause: wrong delimiter. Fix: 1.
+Select the column. 2. Data > Text to Columns. 3. Choose the correct
+separator. 4. Inspect the preview. 5. Confirm.
+
+4.5 If dates are imported as text - Reimport and select a matching date
+format if possible. - Or use Data > Text to Columns and select the date
+column type. - If text is consistently YYYY-MM-DD, DATEVALUE may work
+depending on locale. - Verify with =ISNUMBER(A2). A real date is stored
+as a number; text dates are not.
+
+============================================================ 5.
+STRUCTURE A DATASET SO FORMULAS AND CHARTS WORK
+============================================================
+
+Use a clean rectangular table.
+
+GOOD STRUCTURE: Record_ID | Date | Group | Category | X_Value | Y_Value
+| Uncertainty R001 | … | North | A | 12.4 | 8.1 | 0.2 R002 | … | South |
+B | 13.1 | 7.9 | 0.3
+
+Rules: - One header row. - One record per row. - One variable per
+column. - No merged cells inside the data. - No blank rows inside the
+table. - No subtotal rows inside raw data. - Consistent units in each
+column. - Do not mix numbers and text in the same measurement column. -
+Keep raw source data separate from cleaned data. - Add calculated
+columns to the right of the raw fields. - Include units in header names
+where useful.
+
+5.1 Convert a range into a manageable database range Select the dataset,
+then Data > Define Range (wording may vary). Give it a name. This can
+help with sorting, filtering, and formulas.
+
+5.2 Freeze the header row Click cell A2 (or the row below the headers),
+then: View > Freeze Rows and Columns Depending on the interface, choose
+Freeze First Row or freeze rows/columns at the current cursor position.
+Test by scrolling.
+
+5.3 Useful formatting Format > Cells (Ctrl+1) - Numbers: decimal places,
+dates, percentages, currency. - Font: readable type and size. - Borders:
+use lightly. - Alignment: set headers and values consistently.
+
+Formatting changes appearance, not the underlying value. A value
+displayed as 0.05 may contain more decimal places internally.
+
+============================================================ 6. DATA
+CLEANING: TEXT, NUMBERS, DATES, BLANKS, DUPLICATES
+============================================================
+
+Use a copy of the raw data. Never destroy the only original.
+
+6.1 TRIM: remove extra spaces Syntax: =TRIM(A2)
+
+Example: ” North Region ” becomes “North Region”.
+
+TRIM removes leading/trailing spaces and reduces repeated ordinary
+spaces. It may not remove non-breaking spaces copied from websites. For
+those, use SUBSTITUTE with CHAR(160): =TRIM(SUBSTITUTE(A2;CHAR(160);”
+“))
+
+6.2 CLEAN: remove non-printing characters =CLEAN(A2)
+
+Useful when text contains hidden control characters from imported files.
+A robust cleanup may be: =TRIM(CLEAN(A2))
+
+6.3 CONCATENATE and & Join text: =CONCATENATE(A2;” “;B2) or =A2&” “&B2
+
+Modern versions may also support CONCAT or TEXTJOIN. If a function is
+unavailable in your version, use & or CONCATENATE.
+
+6.4 LEFT, RIGHT, MID, LEN =LEFT(A2;3) first 3 characters =RIGHT(A2;4)
+last 4 characters =MID(A2;2;5) 5 characters starting at position 2
+=LEN(A2) number of characters
+
+6.5 FIND and SEARCH =FIND(“-”;A2) case-sensitive position
+=SEARCH(“ab”;A2) case-insensitive position
+
+6.6 SUBSTITUTE versus REPLACE SUBSTITUTE changes matching text:
+=SUBSTITUTE(A2;“.”;“-”) Example: “12.03.2026” becomes “12-03-2026”.
+
+REPLACE changes characters by position: =REPLACE(A2;4;2;“XX”) Meaning:
+in A2, start at character 4, replace 2 characters with XX.
+
+Do not confuse: - SUBSTITUTE = replace matching text. - REPLACE =
+replace a position-based segment.
+
+6.7 UPPER, LOWER, PROPER =UPPER(A2) =LOWER(A2) =PROPER(A2)
+
+Useful for standardizing inconsistent names or category labels. Check
+abbreviations after PROPER; it may capitalize them in an unwanted way.
+
+6.8 REGEX Calc supports REGEX in modern releases. Availability and
+syntax can depend on version. General syntax: =REGEX(Text;
+Regular_Expression; Replacement; [Flags])
+
+Examples: Remove all characters except digits:
+=REGEX(A2;“[^0-9]”;““;”g”)
+
+Replace repeated spaces with one space: =REGEX(A2;“[ ]+”;” “;”g”)
+
+Replace a leading prefix: =REGEX(A2;“^TMP-”;““)
+
+Extract or replace patterns only after testing the expression on a few
+rows. The “g” flag means global replacement. In older versions without
+REGEX, use SUBSTITUTE, FIND, LEFT, MID, RIGHT, and helper columns.
+
+REGEX SETTINGS: Tools > Options > LibreOffice Calc > Calculate Look for
+regular-expression/wildcard settings. The setting affects how criteria
+in functions such as COUNTIF and SUMIF interpret pattern characters. The
+REGEX function itself is a separate function.
+
+6.9 Remove punctuation or special characters Example: preserve letters,
+digits, spaces, and hyphens: =REGEX(A2;“[^A-Za-z0-9 -]”;““;”g”)
+
+If the data contains accented or non-English letters, a simple A-Z
+pattern may remove valid characters. Test carefully and use a
+Unicode-aware pattern if supported by the installed regex engine.
+
+6.10 Remove duplicates Work on a copy or ensure the original is backed
+up.
+
+Common modern route: 1. Select the complete data range, including
+headers. 2. Data > More Filters > Remove Duplicates (if present in your
+version). 3. Choose which columns define a duplicate. 4. Confirm.
+
+Fallback route in versions without a direct Remove Duplicates
+command: 1. Select the range. 2. Data > More Filters > Standard Filter.
+3. Open Options. 4. Enable No duplication. 5. Choose where the filtered
+result should be copied if that option is offered. 6. Apply the filter.
+7. Inspect the result before replacing the source.
+
+Alternative helper-column method: =COUNTIF($A$2:A2;A2) Rows where the
+result is greater than 1 are later occurrences of that ID. Filter the
+helper column to values greater than 1, inspect, then remove only
+confirmed duplicates.
+
+Important: A duplicate is not always an error. Two separate transactions
+may share the same customer ID. Define the unique key first (for
+example, transaction ID, or a combination of date + reference + amount).
+
+6.11 Missing values First distinguish: - Truly empty cell. - Empty
+string returned by a formula. - A space character. - Text such as NA,
+N/A, NULL, or “-”. - Numeric zero.
+
+These are not equivalent.
+
+Find blanks: - Select the target column. - Edit > Find (Ctrl+F) or
+Edit > Find and Replace (Ctrl+H). - Use regular-expression mode and ^$
+to search for empty cells, if supported by your search settings. -
+Alternatively use a helper formula.
+
+Flag missing values: =IF(A2=““;”MISSING”;“OK”)
+
+Replace missing text with a label: =IF(A2=““;”Unknown”;A2)
+
+Do not replace missing measurements with zero unless zero is genuinely
+the correct value. Better choices may be: - Leave blank. - Use
+“Missing”. - Use a documented imputation method. - Exclude the record
+with a clear reason.
+
+Count blanks: =COUNTBLANK(A2:A1000)
+
+Count non-empty cells: =COUNTA(A2:A1000)
+
+6.12 Fill values down To copy the value/formula from the top cell
+through selected cells: 1. Put the value/formula in the first cell. 2.
+Select that cell and the cells below it. 3. Sheet > Fill Cells > Down,
+or use Ctrl+D in common Calc configurations.
+
+For a formula, relative references adjust row by row. To fill right, use
+Sheet > Fill Cells > Right. Keyboard shortcut can vary by configuration.
+
+6.13 Convert text numbers to numbers Symptoms: SUM ignores values,
+numbers align left, or ISNUMBER returns FALSE. Options: - Data > Text to
+Columns, then set column type Standard. - Use VALUE(A2) where
+appropriate. - Multiply by 1 in a helper column: =A2*1, only if A2 is
+convertible. - Check decimal separators and locale first.
+
+6.14 Find and Replace Ctrl+H opens Find and Replace. Use it to
+standardize: - “NORTH” to “North” - “.” to “-” - repeated labels - known
+unwanted prefixes
+
+Use Replace All only after checking the scope and previewing a few
+examples. Regex mode changes the meaning of special characters.
+
+============================================================ 7.
+FILTERING, SORTING, SELECTING, AND FILLING
+============================================================
+
+7.1 AutoFilter 1. Click in the data table. 2. Data > AutoFilter. 3. Use
+the dropdown arrows in the header row. 4. Select values or conditions.
+5. To remove filters, use Data > AutoFilter again or clear the filter.
+
+7.2 Standard Filter Data > More Filters > Standard Filter. Use it for
+multiple conditions such as: - Region equals North AND value greater
+than 100. - Category equals A OR category equals B, depending on how
+criteria rows are arranged.
+
+7.3 Sorting 1. Select the entire table, not just one column. 2. Data >
+Sort. 3. Choose the sort key. 4. Add secondary sort keys if needed. 5.
+Confirm that the range has headers. 6. Sort.
+
+Warning: sorting only one column can detach values from their records.
+Select the whole table.
+
+7.4 Select visible cells only When copying filtered data, hidden rows
+can sometimes be included depending on the command. Use Edit > Select
+Special > Visible cells only if available in your version, or consult
+Help for “Only Copy Visible Cells”.
+
+7.5 Conditional formatting Format > Conditional > Condition (menu
+wording varies). Example: - Highlight values above a threshold. - Color
+negative values. - Use data bars or color scales if available.
+Conditional formatting is visual; it does not alter the value.
+
+============================================================ 8. FORMULA
+TOOLKIT: FUNCTIONS YOU ARE LIKELY TO NEED
+============================================================
+
+FORMULA SYNTAX IN THIS MANUAL USES SEMICOLONS. If your Calc is
+configured differently, adapt the separator.
+
+8.1 Basic arithmetic =A2+B2 =A2-B2 =A2*B2 =A2/B2 =A2^2 =SUM(A2:A100)
+=PRODUCT(A2:A10)
+
+8.2 Totals and averages =SUM(A2:A100) =AVERAGE(A2:A100) =MEDIAN(A2:A100)
+=MIN(A2:A100) =MAX(A2:A100) =COUNT(A2:A100) counts numeric cells
+=COUNTA(A2:A100) counts non-empty cells =COUNTBLANK(A2:A100) counts
+empty cells
+
+8.3 Rounding and numeric control =ROUND(A2;2) =ROUNDUP(A2;2)
+=ROUNDDOWN(A2;2) =INT(A2) =TRUNC(A2) =ABS(A2) =MOD(A2;3) =SIGN(A2)
+=SQRT(A2) =POWER(A2;2) =EXP(A2) =LN(A2) =LOG10(A2)
+
+8.4 Logical functions =IF(A2>=100;“Pass”;“Review”) =AND(A2>0;B2>0)
+=OR(A2=“A”;A2=“B”) =NOT(A2=“Closed”)
+=IF(AND(A2>=100;B2=“North”);“Priority”;“Standard”)
+=IF(OR(A2=“Urgent”;B2>5000);“Review”;“Normal”)
+
+IFS: =IFS(A2>=90;“High”;A2>=70;“Medium”;A2<70;“Low”)
+
+If IFS is unavailable in an older version, use nested IF:
+=IF(A2>=90;“High”;IF(A2>=70;“Medium”;“Low”))
+
+Error handling: =IFERROR(A2/B2;0) =IFNA(VLOOKUP(E2;$A2:D$100;2;0);“Not
+found”) IFERROR catches many errors; IFNA catches the not-available
+lookup error when supported.
+
+8.5 Conditional totals SUMIF: one condition
+=SUMIF(A2:A100;“North”;C2:C100)
+
+SUMIFS: multiple conditions
+=SUMIFS(C2:C100;A2:A100;“North”;B2:B100;“Retail”)
+
+SUMIFS with numerical threshold: =SUMIFS(C2:C100;B2:B100;“>100”)
+
+SUMIFS with date interval:
+=SUMIFS(C2:C100;A2:A100;“>=”&DATE(2026;1;1);A2:A100;“<”&DATE(2026;2;1))
+
+8.6 Conditional counts =COUNTIF(A2:A100;“North”)
+=COUNTIF(C2:C100;“>100”) =COUNTIFS(A2:A100;“North”;B2:B100;“Retail”)
+=COUNTIFS(A2:A100;“North”;C2:C100;“>100”)
+
+8.7 Conditional averages and extrema =AVERAGEIF(A2:A100;“North”;C2:C100)
+=AVERAGEIFS(C2:C100;A2:A100;“North”;B2:B100;“Retail”)
+=MAXIFS(C2:C100;A2:A100;“North”) =MINIFS(C2:C100;A2:A100;“North”)
+
+MAXIFS, MINIFS, AVERAGEIFS availability can depend on version. Check the
+Function Wizard or official help. If unavailable, use a Pivot Table,
+filter the data, or use an array formula only after checking your
+version’s syntax.
+
+8.8 Text and pattern criteria COUNTIF with wildcard:
+=COUNTIF(A2:A100;“AB”) Counts cells beginning with AB. ”?” matches one
+character in wildcard mode; ”” matches any number of characters. Whether
+criteria use wildcards or regular expressions depends on Calc’s
+calculation settings. For portability with Excel, wildcards are
+generally safer than Calc-specific regex criteria.
+
+8.9 Useful text functions =TRIM(A2) =CLEAN(A2) =UPPER(A2) =LOWER(A2)
+=PROPER(A2) =LEFT(A2;4) =RIGHT(A2;3) =MID(A2;2;5) =LEN(A2) =FIND(“-”;A2)
+=SEARCH(“code”;A2) =SUBSTITUTE(A2;“old”;“new”) =REPLACE(A2;3;2;“XY”)
+=CONCATENATE(A2;” “;B2) =A2&” “&B2 =TEXT(A2;”0.00”) =VALUE(A2)
+
+8.10 Date and time functions =TODAY() =NOW() =DATE(2026;11;8) =YEAR(A2)
+=MONTH(A2) =DAY(A2) =HOUR(A2) =MINUTE(A2) =SECOND(A2) =WEEKDAY(A2)
+=EOMONTH(A2;0) =DATEVALUE(A2) =TIME(12;30;0) =TIMEVALUE(A2)
+
+A date/time is stored as a serial number. The integer part represents
+days; the fractional part represents time of day. Format the cell to
+display the desired date/time.
+
+8.11 Lookup functions
+=VLOOKUP(E2;$A2:D100; 2; 0) = HLOOKUP(E2;A1:Z4; 3; 0) = INDEX(B2:B100; MATCH(E2;A2:A$100;0))
+=LOOKUP(E2;A2:A100;B2:B100) =XLOOKUP(E2;A2:A100;B2:B100;“Not found”) [if
+supported by installed version]
+
+For exact matching in VLOOKUP, use 0 or FALSE as the last argument.
+VLOOKUP searches the first column of its selected range and returns a
+column to the right. INDEX/MATCH can retrieve a value from a separate
+result range and is more flexible.
+
+8.12 Statistical functions =AVERAGE(A2:A100) =MEDIAN(A2:A100)
+=MODE(A2:A100) =STDEV(A2:A100) sample standard deviation in Calc
+=STDEV.P(A2:A100) population standard deviation =VAR(A2:A100) sample
+variance in Calc =VAR.P(A2:A100) population variance
+=CORREL(A2:A100;B2:B100) =COVAR(A2:A100;B2:B100) =SLOPE(B2:B100;A2:A100)
+=INTERCEPT(B2:B100;A2:A100) =RSQ(B2:B100;A2:A100)
+=STEYX(B2:B100;A2:A100) =FORECAST.LINEAR(x;known_y;known_x) [if
+supported by installed version]
+
+IMPORTANT: Check the function’s definition in Function Wizard. Excel
+distinguishes STDEV.S from STDEV.P. Calc’s STDEV is the sample version;
+STDEV.P is population. Similar naming differences can exist in variance
+functions.
+
+8.13 Trigonometry and angle functions =SIN(A2) =COS(A2) =TAN(A2)
+=ASIN(A2) =ACOS(A2) =ATAN(A2) =ATAN2(y;x) [check argument order in the
+Calc Function Wizard] =RADIANS(A2) =DEGREES(A2) =PI()
+
+Most spreadsheet trigonometric functions expect radians, not degrees. If
+A2 contains degrees: =SIN(RADIANS(A2)) If a result is in radians and you
+want degrees: =DEGREES(B2)
+
+8.14 Matrix and array-related functions SUMPRODUCT:
+=SUMPRODUCT(A2:A100;B2:B100) Multiplies corresponding entries and sums
+the products.
+
+Example weighted total: =SUMPRODUCT(B2:B10;C2:C10)
+
+Array formulas can behave differently between versions and compatibility
+modes. Use SUMPRODUCT or helper columns where possible because they are
+often easier to audit.
+
+============================================================ 9. LOOKUP
+AND CROSS-REFERENCE METHODS
+============================================================
+
+Example tables: Transactions sheet: A = Record ID B = Product Code C =
+Quantity
+
+Product_List sheet: A = Product Code B = Description C = Unit Cost
+
+9.1 VLOOKUP In Transactions.D2: =VLOOKUP(B2;Product_List.$A2:C$100;2;0)
+
+Returns the description. For unit cost:
+=VLOOKUP(B2;Product_List.$A2:C$100;3;0)
+
+Safe version: =IFERROR(VLOOKUP(B2;Product_List.$A2:C$100;2;0);“Not
+found”)
+
+9.2 INDEX/MATCH
+=INDEX(Product_List.$B2:B100; MATCH(B2; Product_(L)ist.A2:A$100;0))
+
+How it works: 1. MATCH finds the row position of the code. 2. INDEX
+returns the value at that position from the description range.
+
+9.3 Why lookup returns #N/A Check: - Does the key exist? - Are both keys
+the same data type (text versus number)? - Are there leading/trailing
+spaces? - Are leading zeros preserved? - Is the lookup range correct? -
+Did the lookup range move after copying the formula? Use $ signs. - Did
+you use exact match (0)? - Are there duplicate keys in the lookup table?
+
+============================================================ 10.
+STATISTICS, REGRESSION, COVARIANCE, AND UNCERTAINTY
+============================================================
+
+This section covers common calculations in practical data analysis.
+
+10.1 Mean =AVERAGE(A2:A3505)
+
+10.2 Sample variance =VAR(A2:A3505)
+
+10.3 Population variance =VAR.P(A2:A3505)
+
+10.4 Sample standard deviation =STDEV(A2:A3505)
+
+10.5 Covariance = COVAR(A2:A3505;B2:B3505)
+
+COVAR calculates population covariance in Calc. Verify whether your task
+requires sample or population covariance. If sample covariance is
+required and a dedicated function is not available in your version,
+calculate:
+=SUMPRODUCT(A2:A3505-AVERAGE(A2:A3505);B2:B3505-AVERAGE(B2:B3505))/(COUNT(A2:A3505)-1)
+Depending on version, array evaluation may be needed for the expression
+inside SUMPRODUCT. A safer helper-column method: C2 =
+(A2-AVERAGE($A2:A3505)) * (B2 − AVERAGE(B2:B$3505)) Then sample
+covariance: =SUM(C2:C3505)/(COUNT(A2:A3505)-1)
+
+10.6 Correlation =CORREL(A2:A3505;B2:B3505) Range is from -1 to +1.
+Correlation measures linear association, not causation.
+
+10.7 Linear regression Slope: =SLOPE(B2:B3505;A2:A3505)
+
+Intercept: =INTERCEPT(B2:B3505;A2:A3505)
+
+Predicted y for x in D2: =$F1 * D2+F$2 where F1 contains slope and F2
+contains intercept.
+
+Equation: y = a*x + b
+
+Do not reverse the arguments: SLOPE(known_y;known_x).
+
+10.8 Deming regression and errors in both variables Ordinary
+least-squares regression assumes the x-values are known without
+measurement error. If both x and y have significant uncertainty, a
+different model such as Deming regression may be required. Do not
+automatically use SLOPE as a substitute for Deming regression. If a task
+gives a specified ratio of error variances, use the exact formula
+supplied by the task or an approved numerical method. Keep the input
+uncertainty columns and document the ratio assumption.
+
+10.9 Uncertainty propagation by partial derivatives For independent
+input quantities x and y and output f(x,y): sigma_f =
+SQRT((df/dxsigma_x)^2 + (df/dysigma_y)^2)
+
+Example: f = x + y sigma_f = SQRT(sigma_x^2 + sigma_y^2)
+
+For: f = x - y sigma_f = SQRT(sigma_x^2 + sigma_y^2)
+
+For: f = x*y relative uncertainty: sigma_f/ABS(f) = SQRT((sigma_x/x)^2 +
+(sigma_y/y)^2)
+
+For: f = x/y relative uncertainty: sigma_f/ABS(f) = SQRT((sigma_x/x)^2 +
+(sigma_y/y)^2)
+
+These formulas assume independent errors and small uncertainties. If
+errors are correlated, covariance terms may be required.
+
+10.10 Filter by uncertainty threshold Suppose a dataset has 6,793
+records and an uncertainty field for each of several measurements. Keep
+only records where every required uncertainty is <= 0.05. Use: Data >
+AutoFilter Then set each uncertainty column to <= 0.05. Apply all
+filters together. The conditions across columns act as AND. Copy visible
+qualifying rows to a new sheet named filtered_data. Check the remaining
+count. In the worked example from the user’s earlier practical workflow,
+the official filter result was 3,504 records from 6,793. Treat those
+counts as a validation target only when using that same source dataset
+and same criteria. Do not use a synthetic 250-row sample as a substitute
+for a required full dataset.
+
+10.11 Column/range discipline If a header is in row 1 and there are
+3,504 retained records, the data occupy rows 2 through 3,505. A range
+including the header is row 1 through 3,505. Example:
+$M1:M3505O1:O3505Whencalculatingstatistics, normallyexcludethetextheader:M2:M$3505
+Always check whether your formula range accidentally includes a header
+or omits the final data row.
+
+10.12 Useful validation checks - COUNT of numeric rows. - COUNTBLANK of
+required fields. - MIN and MAX of each measurement. - Check no
+uncertainty threshold is violated. - Check that calculated columns
+contain no unexpected errors. - Compare formulas against a few hand
+calculations.
+
+============================================================ 11.
+TRIGONOMETRY AND ANGLE CALCULATIONS
+============================================================
+
+11.1 Degrees versus radians Calc’s SIN, COS, and TAN expect radians. If
+angle in degrees is in A2: =SIN(RADIANS(A2)) =COS(RADIANS(A2))
+=TAN(RADIANS(A2))
+
+11.2 Convert back to degrees =DEGREES(ASIN(B2))
+
+11.3 Two-argument inverse tangent ATAN2 is useful when the sign and
+quadrant of x and y matter. Check the Function Wizard for the order of
+arguments in your Calc version. Do not assume all spreadsheet programs
+present the arguments in the same order. Test with known points: - x
+positive, y zero -> 0 degrees - x zero, y positive -> 90 degrees - x
+negative, y zero -> 180 degrees or -180 degrees depending on
+convention - x zero, y negative -> -90 degrees
+
+11.4 Normalize an angle A common 0-to-360-degree normalization:
+=MOD(A2;360)
+
+A -180-to-180-degree normalization: =MOD(A2+180;360)-180
+
+11.5 Difference between angles For a signed smallest difference in
+degrees: =MOD(B2-A2+180;360)-180
+
+Test edge cases around 0 and 360 degrees.
+
+11.6 Periodic calculations For a generic repeating process: phase =
+2PI()time/period Then: =SIN(2PI()A2/$B1) = COS(2 * PI() * A2/B$1)
+
+Use these to build smooth repeating curves and compare two processes
+with different periods or phase offsets.
+
+============================================================ 12. DATES,
+TIMES, AND CONTINUOUS TIME VALUES
+============================================================
+
+12.1 Date serials Calc stores dates as serial numbers. Subtracting two
+dates gives elapsed days: =B2-A2
+
+Elapsed hours: =(B2-A2)*24
+
+Elapsed minutes: =(B2-A2)*1440
+
+12.2 Date/time construction =DATE(2026;11;8)+TIME(14;30;0)
+
+12.3 Extract components =YEAR(A2) =MONTH(A2) =DAY(A2) =HOUR(A2)
+=MINUTE(A2) =SECOND(A2)
+
+12.4 Continuous day count from a chosen epoch If a task requires a
+continuous day count, define the epoch explicitly. For an epoch stored
+in E1: =A2-$E$1 This avoids hard-coding an unexplained offset. If the
+task specifies a particular epoch or time standard, follow that
+specification exactly.
+
+12.5 Time-zone and daylight-saving caution A spreadsheet date/time
+usually does not carry a full time-zone database. Store the original
+time zone or offset in a separate field when records come from different
+regions. Do not silently mix local times and UTC values.
+
+============================================================ 13. GRAPHS:
+COMPLETE TUTORIAL FROM DATA TO POLISHED CHART
+============================================================
+
+Charts are often where a correct analysis can be made to look wrong. The
+most important choice is selecting the correct chart type and defining
+the X and Y ranges explicitly.
+
+13.1 Choose the correct chart COLUMN: compare categories, such as totals
+by department. BAR: compare categories when labels are long. LINE: show
+a sequence over equally spaced categories, such as monthly totals. XY
+SCATTER: show the relationship between two numerical variables. Use this
+when the x-values are real numerical values, not just labels. PIE: show
+a small number of parts of one whole; avoid many slices. AREA: show
+totals or cumulative quantities over time. COMBINATION: compare
+different measures, sometimes with different scales, if the chart
+remains readable.
+
+For two numerical variables, use XY Scatter, not a Line chart.
+
+13.2 Prepare graph data correctly A clean scatter table: X_Value |
+Series_A | Series_B 0 | 2.1 | 1.8 1 | 2.8 | 2.4 2 | 3.0 | 2.9 3 | 4.2 |
+3.7
+
+For one series: - X values in column A. - Y values in column B.
+
+For two series sharing the same x-values: - X values in A. - Series A
+y-values in B. - Series B y-values in C.
+
+For two series with different x-values: - Keep each series’ x and y
+columns together, for example A:B and D:E. - Add each series separately
+in the chart’s Data Series page.
+
+13.3 Create a chart 1. Select the data including headers. 2. Insert >
+Chart. 3. Chart Wizard opens. 4. Choose chart type. 5. For numerical x-y
+data, choose XY (Scatter). 6. Choose points only or points and lines,
+depending on the task. 7. Click Next. 8. Inspect Data Range. 9. Choose
+Data series in columns when each series is a column. 10. Set First row
+as label and First column as label if appropriate. 11. Click Next to
+inspect Data Series. 12. Verify each series name, X-values range, and
+Y-values range. 13. Click Next to add chart elements. 14. Add title,
+subtitle if needed, X-axis title, Y-axis title. 15. Click Finish.
+
+13.4 The most important chart dialog: Data Series If the graph is wrong,
+inspect: - Series list: are all required series present? - Name: does
+the series point to the header cell? - X-values: does it point to the
+intended numeric x column? - Y-values: does it point to the intended
+numeric y column? - Categories: relevant mainly for category charts. -
+Data range: are headers included correctly?
+
+For a scatter plot, each series must have its own X-values and Y-values
+ranges.
+
+13.5 Edit an existing chart 1. Click the chart once to select the chart
+object. 2. Double-click the chart to enter chart-edit mode. 3.
+Right-click the element you want to change. 4. Choose the relevant
+Format command. 5. Click outside the chart to leave chart-edit mode.
+
+Useful edits: - Right-click chart background > Format Chart Area. -
+Right-click plot area > Format Plot Area. - Right-click axis > Format
+Axis. - Right-click data series > Format Data Series. - Right-click
+title > Format Title. - Use Insert > Titles while in chart-edit mode if
+available.
+
+13.6 Change the chart type after creation Double-click chart.
+Right-click chart area or use Format > Chart Type, depending on version.
+Choose the new type. If switching to XY Scatter, recheck every series’
+X-values. Do not assume Calc will infer the correct x ranges.
+
+13.7 Change dot/marker size 1. Double-click chart. 2. Click the data
+series once to select the series. 3. Right-click > Format Data Series.
+4. Find the Line/Point or Data Points settings; the exact tab depends on
+chart type/version. 5. Select a marker symbol and adjust its size. 6.
+Apply. If the option is not visible, check that you selected the data
+series rather than the plot area or chart frame.
+
+13.8 Change line thickness and marker style Right-click series > Format
+Data Series. Use Line settings for color, width, and style. Use
+Point/Marker settings for symbol and size. For a points-only scatter
+chart, set line style to None if a connecting line appears.
+
+13.9 Set axis minimum, maximum, and interval 1. Double-click chart. 2.
+Right-click the horizontal axis > Format Axis. 3. Open the Scale tab. 4.
+Disable Automatic for Minimum and Maximum if manual bounds are required.
+5. Enter the desired minimum and maximum. 6. Set major interval if
+needed. 7. Repeat for vertical axis.
+
+Do not set an axis minimum to zero automatically for every chart. For
+scatter plots, use a range that shows the data honestly and clearly.
+
+13.10 Change number formatting on axes Right-click axis > Format Axis >
+Numbers. Choose: - Number - Percentage - Currency - Date - Scientific
+Set decimal places and thousands separators.
+
+13.11 Add a trendline 1. Double-click chart. 2. Select the data series.
+3. Right-click > Insert Trend Line. 4. Choose Linear or another
+justified model. 5. Enable equation and R-squared display if the version
+offers those options. 6. Explain what the fit means; do not treat
+R-squared as proof of causation.
+
+13.12 Add error bars Error bars are available for suitable chart types
+and series. 1. Double-click chart. 2. Select the series. 3. Use Insert >
+Y Error Bars or the series formatting options, depending on version. 4.
+Choose fixed value, percentage, standard deviation, or cell-range-based
+values if available. 5. If custom cell ranges are supported, point to
+the positive and negative uncertainty columns. 6. Check that the error
+bars use the correct units and scale.
+
+If your version does not expose custom error-bar ranges in the
+interface, consult the version-specific chart guide and use the
+supported chart option rather than inventing a range syntax.
+
+13.13 Add labels Use Insert > Data Labels while the series is selected,
+or right-click the series > Insert Data Labels. Use labels only when
+they help interpretation. Too many labels make a chart unreadable.
+
+13.14 Legend Use Insert > Legend or the Chart Wizard elements page.
+Rename series by changing the header cell or the series Name reference.
+
+13.15 Make a professional chart - Descriptive title. - Units on axes. -
+Consistent font. - Readable tick labels. - Minimal gridlines. - No
+unnecessary 3D. - Distinguishable series markers. - Legend only when
+needed. - Sensible axis bounds. - No unexplained abbreviations. - Source
+and time period in a subtitle or note when appropriate.
+
+13.16 Put multiple datasets on the same graph Case A: same X values. Use
+one shared X column and separate Y columns. Create XY Scatter. In Data
+Series, define Series A and Series B with the same X range and different
+Y ranges.
+
+Case B: different X values. Create the chart from one series first.
+Double-click chart > right-click > Data Ranges or use the Data Series
+page. Add a second series. Set its X-values to its own X column and
+Y-values to its own Y column. Do not force both datasets to share one X
+range if their x-values differ.
+
+============================================================ 14. GRAPH
+TROUBLESHOOTING: WRONG AXES, MISSING SERIES, BAD SCALES
+============================================================
+
+PROBLEM: The horizontal axis shows 1, 2, 3, 4 instead of my X data.
+LIKELY CAUSE: - You chose Line instead of XY Scatter. - The X-values
+range was not assigned. FIX: 1. Double-click chart. 2. Change type to XY
+(Scatter). 3. Open Data Series. 4. Select each series. 5. Assign the
+correct X-values range. 6. Assign the correct Y-values range. 7. Confirm
+that the X-values are numeric, not text.
+
+PROBLEM: Two datasets appear as separate charts or one dataset is
+missing. FIX: - Use one chart object. - Add both series in the Data
+Series page. - Define X and Y ranges separately for each series. - Check
+that the second series is not accidentally assigned as categories.
+
+PROBLEM: The graph uses the wrong x-axis values. CHECK IN THIS ORDER: 1.
+Chart type is XY Scatter. 2. Data Range page says data are in
+columns/rows correctly. 3. First row/column label options are correct.
+4. Data Series page X-values point to the intended cells. 5. Y-values
+point to the intended cells. 6. X column contains numbers, not text. 7.
+The X and Y ranges have the same number of rows. 8. Header row is
+excluded from numerical ranges.
+
+PROBLEM: Dates are plotted as category labels, not proportional time.
+Use XY Scatter if spacing between dates matters numerically. Use Line if
+you intentionally want equally spaced categories.
+
+PROBLEM: Points are connected unexpectedly. Select the series > Format
+Data Series > Line > None, or choose Points Only in the chart subtype.
+
+PROBLEM: Markers are too large. Format Data Series > Point/Marker
+settings > reduce size.
+
+PROBLEM: A chart’s x-axis is sorted alphabetically. Your chart may be
+using a category axis. Use XY Scatter for numeric x values. If
+categories are dates or month names, sort the source table
+chronologically before charting.
+
+PROBLEM: A series has a different scale. Do not immediately put it on a
+secondary axis. First ask whether comparing the scales is meaningful. If
+a secondary axis is necessary, use the series/axis options available in
+your Calc version and label both axes clearly.
+
+PROBLEM: Chart does not update after data changes. - Check that the
+chart data range includes the new rows. - Right-click chart > Data
+Ranges and expand the source range. - If the chart is based on a Pivot
+Table, refresh the Pivot Table first.
+
+PROBLEM: Axis numbers show too many decimals. Right-click axis > Format
+Axis > Numbers > set decimal places.
+
+PROBLEM: Chart wizard buttons are disabled. The data range syntax may be
+invalid. Check sheet name, separators, range boundaries, and quotation
+marks.
+
+============================================================ 15. PIVOT
+TABLES / DATAPILOT
+============================================================
+
+A Pivot Table summarizes many rows without writing a separate formula
+for every category.
+
+15.1 Prepare data - One header row. - No blank header cells. - No merged
+cells. - No blank rows inside the table. - Numeric columns must contain
+numeric values. - Date column must contain real dates.
+
+15.2 Create 1. Select a cell inside the dataset or select the full
+range. 2. Data > Pivot Table > Insert or Edit (menu wording can vary).
+3. Choose Current Selection. 4. In the layout dialog, drag fields
+into: - Row Fields - Column Fields - Data Fields - Filter Fields 5.
+Double-click a field in Data Fields to choose Sum, Count, Average, Max,
+Min, etc. 6. Choose output location, often New Sheet. 7. Click OK.
+
+15.3 Example Rows: Region Columns: Category Data: Sum of Revenue Filter:
+Year
+
+15.4 Common aggregation mistakes - Revenue should usually be Sum, not
+Count. - Record ID should usually be Count, not Sum. - A numeric ID may
+be summed accidentally; change its aggregation. - If a number column is
+imported as text, Sum may behave unexpectedly.
+
+15.5 Group dates Grouping capabilities can differ by version and source.
+A robust approach is to add helper columns: Month: =TEXT(A2;“YYYY-MM”)
+Quarter: =“Q”&ROUNDUP(MONTH(A2)/3;0) Year: =YEAR(A2)
+
+Then use those fields in the Pivot Table.
+
+15.6 Filter Drag a field to Filter Fields or use the filter dropdown in
+the resulting Pivot Table.
+
+15.7 Refresh Click inside the Pivot Table: Data > Pivot Table > Refresh
+If new rows are outside the original source range, edit the source range
+first.
+
+15.8 Edit Click inside the Pivot Table: Data > Pivot Table > Insert or
+Edit Adjust layout or source range.
+
+15.9 Pivot Table troubleshooting - Blank field names: fix the source
+headers. - Wrong total: check Sum versus Count. - New rows absent:
+expand the source range and refresh. - Dates not grouping: confirm they
+are real dates, not text. - Duplicate-looking categories: clean spaces
+and inconsistent capitalization first.
+
+============================================================ 16.
+ANALYSIS TOOLS, GOAL SEEK, SCENARIOS, AND SOLVER
+============================================================
+
+16.1 Goal Seek Use when one input must be adjusted to make a formula
+equal a target.
+
+Example: B2 = Revenue (starting guess) B3 = Fixed cost B4 = Variable
+cost rate B5 = Profit = B2-B3-B2*B4
+
+Tools > Goal Seek - Formula Cell: B5 - Target Value: desired profit -
+Variable Cell: B2
+
+Calc changes B2 until B5 reaches the target.
+
+16.2 Scenarios Use when you want to compare several sets of
+assumptions. 1. Select the changing input cells. 2. Tools > Scenarios.
+3. Name the scenario. 4. Change assumptions and create additional
+scenarios. 5. Switch between scenarios to compare outputs.
+
+16.3 Solver Solver handles optimization with constraints, if installed
+and available: Tools > Solver. Example: maximize profit by choosing
+quantities subject to budget and capacity constraints. Define: -
+Objective cell. - Maximize/minimize/target. - Variable cells. -
+Constraints. Do not confuse Goal Seek (one variable, one target) with
+Solver (multiple variables and constraints).
+
+16.4 Data > Statistics Depending on version, Calc provides tools such as
+descriptive statistics, correlation, covariance, regression, sampling,
+and other analysis procedures. Use the Data > Statistics menu and
+inspect the available tool list in your version. For regression,
+identify the X and Y input ranges carefully and choose output location.
+
+============================================================ 17.
+SPREADSHEET AUTOMATION AND MACROS
+============================================================
+
+17.1 Macro recording Macro recording may need enabling: Tools >
+Options > LibreOffice > Advanced Enable macro recording (limited), if
+available.
+
+Record: Tools > Macros > Record Macro Perform repetitive
+formatting/actions. Stop recording. Save with a meaningful name.
+
+Run: Tools > Macros > Organize Macros > Basic Select the macro and Run.
+
+17.2 What macros can and cannot do - The recorder is limited. - Some
+actions are not recorded. - Relative and absolute cell references
+matter. - Excel VBA is not the same as LibreOffice Basic. - UNO API
+provides deeper control. - Macro security matters; run only trusted
+macros.
+
+17.3 Safe automation habits - Test on a copy. - Use clear macro names. -
+Keep a manual fallback. - Do not store passwords in macros. - Do not
+enable all macros globally just to run one file. - Save a backup before
+running a macro that edits many cells.
+
+============================================================ 18.
+PRACTICAL WORKFLOW FOR A TIMED DATA-ANALYSIS TASK
+============================================================
+
+Use this sequence. It reduces mistakes and avoids wasting time.
+
+PHASE 1: INSPECT 1. Open the file. 2. Check row count and column count.
+3. Identify headers and data types. 4. Check whether dates and numeric
+values are real numbers. 5. Identify missing values and duplicate keys.
+6. Save a working copy.
+
+PHASE 2: IMPORT AND CLEAN 1. Import CSV with correct delimiter and
+locale. 2. Preserve IDs as text if needed. 3. Standardize text. 4.
+Convert numbers and dates. 5. Filter by required criteria. 6. Remove
+only genuine duplicates. 7. Create a clean output sheet. 8. Record the
+number of retained rows.
+
+PHASE 3: CALCULATE 1. Add derived columns. 2. Use absolute references
+for constants. 3. Use helper columns for complex calculations. 4. Fill
+formulas down. 5. Check first row, middle row, and final row manually.
+6. Check for errors.
+
+PHASE 4: ANALYZE 1. Calculate count, mean, median, min, max, variance,
+standard deviation. 2. Calculate covariance/correlation if needed. 3.
+Fit a regression if required. 4. Use SUMIFS/COUNTIFS/AVERAGEIFS for
+grouped results. 5. Build Pivot Tables if useful.
+
+PHASE 5: GRAPH 1. Decide whether data are categories or numerical x-y
+pairs. 2. Choose chart type. 3. Define X and Y ranges explicitly. 4. Add
+every required series. 5. Set axis bounds and units. 6. Add titles and
+legend. 7. Check whether the graph supports the intended conclusion.
+
+PHASE 6: VALIDATE AND SAVE 1. Check row counts. 2. Check formulas and
+units. 3. Recalculate. 4. Save ODS. 5. Export XLSX only if needed. 6.
+Reopen and inspect the delivered file.
+
+============================================================ 19. EXACT
+TROUBLESHOOTING NOTES AND COMMON CALC ERRORS
+============================================================
+
+19.1 Err:509 Missing operator. Check whether a multiplication sign, plus
+sign, or separator is missing.
+
+19.2 Err:508 Unmatched pair. Check parentheses.
+
+19.3 Err:502 Invalid argument. Common causes: - SUMIFS ranges have
+different sizes. - Wrong function argument type. - Invalid range. -
+Incorrect argument order.
+
+19.4 #NAME? Calc does not recognize a function or name. Check: -
+Spelling. - Function availability in your version. - Named range
+exists. - Text values are in quotation marks. - Function language/name
+settings.
+
+19.5 #N/A Lookup did not find a match. Check exact match, spaces, data
+type, leading zeros, and lookup range.
+
+19.6 #VALUE! Wrong data type. Examples: - Trying to multiply text by a
+number. - Date imported as text. - A formula references a text label
+unexpectedly.
+
+19.7 #DIV/0! Denominator is zero or blank. Use: =IFERROR(A2/B2;0) But do
+not hide a meaningful divide-by-zero problem without documenting it.
+
+19.8 Formula displays as text Possible causes: - Cell format is Text. -
+Formula begins with an apostrophe. - Missing equals sign. Fix: 1.
+Format > Cells > Numbers > General. 2. Re-enter the formula. 3. Check
+for a leading apostrophe.
+
+19.9 Formula does not update Check: - Automatic calculation enabled. -
+Formula references correct cells. - Workbook is not in manual
+calculation mode. - Press F9 to recalculate.
+
+19.10 Decimal comma versus decimal point Check locale and import
+settings. Do not mix decimal conventions in one column.
+
+19.11 A value looks rounded Cell display format may hide decimals.
+Increase decimal places or inspect the formula bar. Displayed precision
+is not necessarily stored precision.
+
+19.12 Sorting breaks rows Undo immediately. Select the entire table
+before sorting, not a single field column.
+
+19.13 Chart uses row numbers as X Switch to XY Scatter and explicitly
+set X-values.
+
+19.14 Chart series are wrong Open Data Series and inspect Name,
+X-values, and Y-values for every series.
+
+19.15 Formula separator confusion Default Calc formulas usually use
+semicolons. If a copied formula has commas between arguments, adapt
+them. Do not change separators inside quoted strings.
+
+19.16 Sheet-name syntax Native Calc often uses Sheet1.A1 rather than
+Sheet1!A1. Quote sheet names containing spaces: =‘Clean Data’.A1
+
+19.17 Data imported as text Use Text to Columns or VALUE after checking
+locale and formatting.
+
+19.18 Missing values treated as zero A blank cell, an empty string, text
+“NA”, and numeric zero are different. Test using ISBLANK, A2=““,
+COUNTBLANK, and ISNUMBER as appropriate.
+
+============================================================ 20.
+EXCEL-TO-CALC QUICK REFERENCE
+============================================================
+
+TASK EXCEL EXAMPLE CALC EXAMPLE Sum =SUM(A1:A10) =SUM(A1:A10) IF
+=IF(A1>5,“Yes”,“No”) =IF(A1>5;“Yes”;“No”) AND =AND(A1>5,B1<10)
+=AND(A1>5;B1<10) SUMIF =SUMIF(A:A,“North”,B:B) =SUMIF(A:A;“North”;B:B)
+SUMIFS =SUMIFS(C:C,A:A,“North”,B:B,“A”) =SUMIFS(C:C;A:A;“North”;B:B;“A”)
+COUNTIFS =COUNTIFS(A:A,“North”,B:B,“>5”) =COUNTIFS(A:A;“North”;B:B;“>5”)
+VLOOKUP =VLOOKUP(E2,A:D,2,FALSE) =VLOOKUP(E2;A:D;2;0) INDEX/MATCH
+=INDEX(B:B,MATCH(E2,A:A,0)) =INDEX(B:B;MATCH(E2;A:A;0)) IFERROR
+=IFERROR(A1/B1,0) =IFERROR(A1/B1;0) TRIM =TRIM(A2) =TRIM(A2) CONCATENATE
+=CONCATENATE(A2,” “,B2) =CONCATENATE(A2;” “;B2) SUBSTITUTE
+=SUBSTITUTE(A2,”x”,“y”) =SUBSTITUTE(A2;“x”;“y”) ROUND =ROUND(A2,2)
+=ROUND(A2;2) SIN =SIN(RADIANS(A2)) =SIN(RADIANS(A2)) CORREL
+=CORREL(A2:A10,B2:B10) =CORREL(A2:A10;B2:B10)
+
+Important compatibility notes: - Excel and Calc function support is not
+identical. - XLOOKUP and newer dynamic-array functions depend on the
+Calc version. - Excel macros do not automatically become LibreOffice
+macros. - Formula separators can be changed by locale/settings. - Some
+chart features and external connections may not round-trip perfectly.
+
+============================================================ 21. HOW TO
+USE DOCUMENTATION WITHOUT AI
+============================================================
+
+Documentation is not just something to read after you get stuck. It is a
+tool you can use systematically during practice.
+
+21.1 First source: built-in Help Press F1 or choose Help > LibreOffice
+Help. Search for the exact task, not a vague phrase. Examples: - “Pivot
+Table” - “XY scatter chart” - “Goal Seek” - “REGEX function” - “Text to
+Columns” - “absolute reference” - “error 502”
+
+Use Help when you need: - A menu path. - A function’s argument order. -
+A definition of a dialog option. - A version-specific explanation. - An
+explanation of an error code.
+
+21.2 Function Wizard Press Ctrl+F2. Workflow: 1. Search for the function
+name. 2. Read the function description. 3. Inspect every argument. 4.
+Identify which arguments are required. 5. Enter a tiny test example. 6.
+Compare the result with a hand calculation. 7. Only then apply it to
+thousands of rows.
+
+This is especially useful for functions whose argument order is easy to
+confuse, such as SLOPE, INDEX, MATCH, VLOOKUP, ATAN2, and statistical
+functions.
+
+21.3 Official Calc Guide Use the official Calc Guide:
+https://books.libreoffice.org/en/CG262/CG262.html
+
+It includes chapters on: - Entering and formatting data. - Formulas and
+functions. - Charts and graphs. - Pivot Tables. - Data analysis. -
+Linking data. - Macros. - Calc as a database. - Keyboard shortcuts. -
+Error codes.
+
+If your installed version is older, use the matching guide version
+rather than assuming every screenshot or feature is identical.
+
+21.4 Official Help website https://help.libreoffice.org/
+
+Search for a function by exact name, for example:
+https://help.libreoffice.org/latest/en-US/text/scalc/01/func_sumifs.html
+
+The function reference normally provides: - Syntax. - Argument
+descriptions. - Examples. - Availability information. - Notes about
+special criteria behavior.
+
+21.5 Documentation for a function: the five-question method Whenever you
+look up a function, answer these five questions: 1. What does it return?
+2. What is the exact syntax? 3. What does each argument mean? 4. What
+happens with blank cells, text, or errors? 5. Is it available in my
+installed version?
+
+Then create a tiny test table with 3–5 rows and verify it.
+
+21.6 Search the manual effectively Use specific searches: - “LibreOffice
+Calc SLOPE function arguments” - “LibreOffice Calc chart data series X
+values” - “LibreOffice Calc remove duplicates” - “LibreOffice Calc
+regular expressions formulas” - “LibreOffice Calc Pivot Table refresh” -
+“LibreOffice Calc CSV import decimal separator”
+
+Prefer: 1. Official LibreOffice Help. 2. Official LibreOffice Guide. 3.
+Ask LibreOffice community answers. 4. Reputable tutorials that show the
+same version you use.
+
+21.7 Ask the community effectively Useful community site:
+https://ask.libreoffice.org/
+
+Before posting: - State your LibreOffice version (Help > About). - State
+your operating system. - Paste a minimal example dataset with fake
+values. - Paste the exact formula. - Paste the exact error. - Explain
+what result you expected. - Explain what happened instead. - Include the
+menu path you tried. - Do not upload private customer or company data.
+
+A good question: “In LibreOffice Calc 26.x on Windows, I have numeric X
+values in A2:A101 and Y values in B2:B101. My XY Scatter chart shows
+1–100 on the horizontal axis. How do I assign A2:A101 as the X-values
+for the series?”
+
+This is much better than: “My chart is broken.”
+
+21.8 Build your own offline reference folder Create a folder with: -
+Calc Guide PDF. - Function reference notes. - A small formula test
+workbook. - A chart test workbook. - A list of errors and their fixes. -
+A text file of useful menu paths.
+
+Download official documentation from:
+https://documentation.libreoffice.org/en/english-documentation/
+
+If you may be offline, install the LibreOffice offline Help component if
+it is available for your operating system.
+
+21.9 Documentation during a timed practical task Do not read an entire
+chapter while the clock is running. Use this sequence: 1. Identify the
+exact operation. 2. Search the exact command/function name. 3. Read
+syntax or menu steps. 4. Test on 3 rows. 5. Apply to full data. 6.
+Validate with a second method. 7. Record the useful solution in your own
+notes.
+
+21.10 Keep a personal error log Use a table: Date | Problem | Cause |
+Fix | Verification Example: Today | X axis shows 1,2,3 | Line chart
+selected | Changed to XY Scatter and assigned X range | X axis now
+matches source values
+
+This turns every mistake into a reusable skill.
+
+============================================================ 22.
+PRACTICE DRILLS AND FINAL CHECKLIST
+============================================================
+
+DRILL 1: CSV IMPORT - Import a comma-separated file. - Preserve an ID
+with leading zeros. - Verify numeric columns with ISNUMBER. - Verify
+date columns with ISNUMBER. - Save as ODS.
+
+DRILL 2: CLEANING - Remove leading/trailing spaces. - Standardize
+labels. - Replace a character. - Remove duplicates using a defined
+key. - Flag missing values. - Count valid records.
+
+DRILL 3: FORMULAS - Calculate sum, mean, median, variance, and standard
+deviation. - Use IF and nested IF. - Use AND and OR. - Use SUMIFS and
+COUNTIFS. - Use VLOOKUP and INDEX/MATCH. - Use IFERROR.
+
+DRILL 4: STATISTICS - Calculate covariance and correlation. - Calculate
+regression slope and intercept. - Plot predicted values. - Compare a few
+results manually.
+
+DRILL 5: GRAPHS - Create a column chart. - Create a line chart. - Create
+an XY scatter chart. - Add two separate series. - Correct the X-values
+range. - Change marker size. - Set axis limits. - Add titles and a
+trendline.
+
+DRILL 6: REPORTING - Create a Pivot Table. - Summarize by category. -
+Filter by period. - Refresh after changing source data. - Build a
+one-sheet dashboard.
+
+DRILL 7: WHAT-IF - Use Goal Seek. - Create three scenarios. - Compare
+output values. - Record assumptions.
+
+FINAL PRE-SUBMISSION CHECKLIST [ ] Original data preserved. [ ] CSV
+delimiter and locale correct. [ ] IDs preserved as intended. [ ] Dates
+are real dates. [ ] Numeric columns are numeric. [ ] Missing values
+handled transparently. [ ] Duplicate definition is justified. [ ] Filter
+criteria applied correctly. [ ] Row count checked. [ ] Formula ranges
+include all records and exclude headers where required. [ ] Absolute
+references used where needed. [ ] Functions tested on a small sample. [
+] No unexplained formula errors. [ ] Statistical method matches the
+requested definition. [ ] Graph type matches the data. [ ] Scatter
+X-values explicitly assigned. [ ] Every required series appears. [ ]
+Axes, units, and labels are clear. [ ] Pivot Tables refreshed. [ ]
+Results independently checked. [ ] ODS master saved. [ ] Exported file
+reopened and inspected.
+
+============================================================ 23.
+OFFICIAL DOCUMENTATION AND LEARNING LINKS
+============================================================
+
+1.  LibreOffice Calc Guide (current guide landing page):
+    https://books.libreoffice.org/en/CG262/CG262.html
+
+2.  LibreOffice Help: https://help.libreoffice.org/
+
+3.  Official documentation downloads:
+    https://documentation.libreoffice.org/en/english-documentation/
+
+4.  Ask LibreOffice community: https://ask.libreoffice.org/
+
+5.  LibreOffice FAQ: https://wiki.documentfoundation.org/Faq
+
+6.  Calc chart guide:
+    https://books.libreoffice.org/en/CG262/CG26206-CreatingChartsAndGraphs.html
+
+7.  Formula basics:
+    https://help.libreoffice.org/latest/en-US/text/scalc/guide/formulas.html
+
+8.  SUMIFS function reference:
+    https://help.libreoffice.org/latest/en-US/text/scalc/01/func_sumifs.html
+
+9.  MAXIFS function reference:
+    https://help.libreoffice.org/latest/en-US/text/scalc/01/func_maxifs.html
+
+10. Wildcards in formulas:
+    https://help.libreoffice.org/latest/en-US/text/scalc/guide/wildcards.html
+
+FINAL ADVICE Learn the workflow, not just isolated formulas: IMPORT ->
+INSPECT -> CLEAN -> FILTER -> CALCULATE -> ANALYZE -> GRAPH -> VALIDATE
+-> SAVE.
+
+When a result looks wrong, do not immediately rewrite the formula. Check
+the input data type, locale, selected range, formula separators, chart
+type, and source range first. Most spreadsheet mistakes come from one of
+those foundations.
+
+
+============================================================
+APPENDIX A: NOTES CARRIED FORWARD FROM YOUR EARLIER SPREADSHEET WORK
+============================================================
+
+This appendix preserves useful spreadsheet-specific details from your earlier practical work while keeping the examples and labels general.
+
+A.1 Large-table filtering checkpoint
+- Original record count: 6,793.
+- Required rule: every required uncertainty field must be less than or equal to 0.05.
+- Expected retained record count for that exact source and exact rule: 3,504.
+- Output sheet name used: filtered_data.
+- If row 1 contains headers and 3,504 records remain, the final data row is 3,505.
+- Therefore, a full column range including the header can be $M$1:$M$3505 or $O$1:$O$3505.
+- A calculation range that excludes the header should begin at row 2, for example $M$2:$M$3505.
+- Do not accidentally include the header in AVERAGE, VAR, CORREL, SLOPE, or other numeric calculations.
+
+A.2 Filtering several columns at once
+1. Keep the original table unchanged.
+2. Turn on Data > AutoFilter.
+3. In each required uncertainty column, select the numeric condition <= 0.05.
+4. Apply all required column filters together. The record must pass every condition.
+5. Copy the visible qualifying records to a new sheet.
+6. Count the resulting records.
+7. Confirm that no retained row violates any of the conditions.
+8. Keep the filter criteria documented beside the result.
+
+A.3 Example calculation checkpoints from the earlier working sheet
+The following values are historical checkpoints from one earlier calculation. They are not universal constants. Use them only when reproducing the same data and the same definitions.
+
+- Metric X mean: approximately -0.08998.
+- Metric X variance: approximately 0.010503.
+- Metric Y mean: approximately -0.37631.
+- Metric Y variance: approximately 0.016562.
+- Covariance between the two metric columns: approximately -0.00194.
+- A previously calculated fitted-line slope: approximately -3.41231.
+
+If your results differ, check these items before changing the formula:
+1. Did you use the same filtered records?
+2. Did you use the same two columns?
+3. Did you exclude the header row?
+4. Did you use sample variance or population variance?
+5. Did you calculate covariance with the same definition?
+6. Did SLOPE receive Y values first and X values second?
+7. Did the ranges start and end on the same rows?
+8. Did a formula include an extra blank or text cell?
+
+A.4 Covariance using two columns
+If the two data columns are K and L and data occupy rows 2 to 3505:
+=COVAR(K2:K3505;L2:L3505)
+
+Use the exact same row limits for both columns.
+Do not use K1:L3505 if row 1 contains headers.
+
+A.5 Regression slope
+If K contains X and L contains Y:
+=SLOPE(L2:L3505;K2:K3505)
+
+The order is known_y first, known_x second.
+If the task defines the reverse relationship, reverse the ranges deliberately.
+
+A.6 Variance and mean
+=AVERAGE(K2:K3505)
+=VAR(K2:K3505)
+=AVERAGE(L2:L3505)
+=VAR(L2:L3505)
+
+Remember:
+- VAR is sample variance in Calc.
+- VAR.P is population variance.
+- A sample/population mismatch can explain a small numerical difference.
+
+A.7 Graph setup that previously caused trouble
+For a scatter graph:
+- Use XY (Scatter), not Line.
+- Set the intended numeric horizontal variable as X-values.
+- Set the intended vertical variable as Y-values.
+- If there are two series, add both to the same chart object.
+- Do not let Calc guess the X-values if the graph is important; set them explicitly in Data Series.
+- Reduce marker size in Format Data Series > Point/Marker settings.
+- If the horizontal axis shows 1, 2, 3, ... rather than your actual X data, inspect the chart type and X-values range first.
+
+A.8 Two separate datasets on one chart
+When two datasets have different horizontal values:
+1. Make an XY Scatter chart using the first dataset.
+2. Double-click the chart.
+3. Open the Data Series page through the chart data-range controls.
+4. Add the second series.
+5. Set the second series Name.
+6. Set its X-values to the second dataset's X column.
+7. Set its Y-values to the second dataset's Y column.
+8. Confirm both series appear in the same chart.
+9. Check the legend and axis ranges.
+
+A.9 When a graph uses the wrong horizontal axis
+Do not start by editing the numbers in the data table.
+Check in this order:
+1. XY Scatter chart type.
+2. Data are arranged in columns or rows correctly.
+3. Header row and header column options.
+4. Series X-values.
+5. Series Y-values.
+6. Numeric data type of the X column.
+7. Equal number of X and Y records.
+
+A.10 Multiple IF construction through the Function Wizard
+If nested IF is confusing:
+1. Select the result cell.
+2. Press Ctrl+F2.
+3. Search for IF.
+4. Enter the first condition.
+5. Enter the result for TRUE.
+6. In the FALSE argument, enter another IF function.
+7. Continue nesting IF functions until all cases are covered.
+8. Confirm the formula and test one example from every category.
+
+Example:
+=IF(A2>=90;"High";IF(A2>=70;"Medium";IF(A2>=50;"Basic";"Low")))
+
+The Function Wizard helps you insert the function structure, but you still need to understand the decision order. Put the highest threshold first when conditions are nested from high to low.
+
+============================================================
+APPENDIX B: QUICK FUNCTION CHECKLIST FOR PRACTICAL DATA WORK
+============================================================
+
+IMPORT AND CHECK
+ISNUMBER
+ISTEXT
+ISBLANK
+COUNT
+COUNTA
+COUNTBLANK
+
+CLEAN AND TRANSFORM TEXT
+TRIM
+CLEAN
+SUBSTITUTE
+REPLACE
+REGEX
+LEFT
+RIGHT
+MID
+LEN
+FIND
+SEARCH
+UPPER
+LOWER
+PROPER
+CONCATENATE
+TEXT
+VALUE
+
+LOGIC AND ERRORS
+IF
+IFS
+AND
+OR
+NOT
+IFERROR
+IFNA
+
+CONDITIONAL ANALYSIS
+SUMIF
+SUMIFS
+COUNTIF
+COUNTIFS
+AVERAGEIF
+AVERAGEIFS
+MAXIFS
+MINIFS
+
+LOOKUPS
+VLOOKUP
+HLOOKUP
+INDEX
+MATCH
+XLOOKUP, if supported
+
+BASIC STATISTICS
+SUM
+AVERAGE
+MEDIAN
+MODE
+MIN
+MAX
+VAR
+VAR.P
+STDEV
+STDEV.P
+CORREL
+COVAR
+SLOPE
+INTERCEPT
+RSQ
+STEYX
+FORECAST.LINEAR, if supported
+
+MATH AND ANGLES
+ABS
+ROUND
+ROUNDUP
+ROUNDDOWN
+INT
+TRUNC
+MOD
+SIGN
+SQRT
+POWER
+EXP
+LN
+LOG10
+SIN
+COS
+TAN
+ASIN
+ACOS
+ATAN
+ATAN2
+RADIANS
+DEGREES
+PI
+
+DATES AND TIME
+DATE
+DATEVALUE
+TIME
+TIMEVALUE
+TODAY
+NOW
+YEAR
+MONTH
+DAY
+HOUR
+MINUTE
+SECOND
+WEEKDAY
+EOMONTH
+
+============================================================
+APPENDIX C: THE 60-SECOND DEBUG ROUTINE
+============================================================
+
+When a formula, chart, or summary looks wrong, do not randomly change settings.
+
+1. Check the source cell values. Are they really numbers, dates, or text?
+2. Check the imported delimiter and locale.
+3. Check formula argument separators.
+4. Check parentheses and quotation marks.
+5. Check whether ranges include the header.
+6. Check that paired X and Y ranges have equal lengths.
+7. Check whether absolute references are required.
+8. Check whether a lookup key contains spaces or leading zeros.
+9. Check whether the chart is XY Scatter when X is numerical.
+10. Check whether the Pivot Table has been refreshed.
+11. Recalculate with F9.
+12. Test the formula on 3–5 rows and compare with a hand calculation.
+
+END OF MANUAL
